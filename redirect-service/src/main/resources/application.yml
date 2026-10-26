@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: redirect-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/url_shortener}
+    username: ${DB_USERNAME:redirect_reader}
+    password: ${DB_PASSWORD:redirect_reader}
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 1000
+      read-only: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 50ms
+      connect-timeout: 200ms
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: 1
+      compression-type: lz4
+      properties:
+        enable.idempotence: false
+        linger.ms: 20
+        max.block.ms: 50
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
+        spring.json.add.type.headers: false
+
+server:
+  port: 8082
+
+app:
+  cache:
+    link-ttl: 10s
+  kafka:
+    topics:
+      clicks: link-clicks
+
+logging:
+  level:
+    kz.amixady.urlshortener: DEBUG

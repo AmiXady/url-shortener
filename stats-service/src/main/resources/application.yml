@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: stats-service
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/stats}
+    username: ${DB_USERNAME:stats}
+    password: ${DB_PASSWORD:stats}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: stats-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 500
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.value.default.type: kz.amixady.urlshortener.stats.event.ClickEvent
+        spring.json.use.type.headers: false
+        spring.json.trusted.packages: kz.amixady.urlshortener.stats.event
+        allow.auto.create.topics: false
+    listener:
+      type: batch
+      ack-mode: batch
+
+server:
+  port: 8083
+
+app:
+  kafka:
+    topics:
+      clicks: link-clicks
