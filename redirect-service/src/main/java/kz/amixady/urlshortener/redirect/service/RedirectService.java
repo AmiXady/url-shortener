@@ -38,7 +38,7 @@ public class RedirectService {
 
         publisher.publish(new ClickEvent(
                 link.id(),
-                code,
+                normalizeCode,
                 now,
                 visitor.userAgent(),
                 visitor.method(),
@@ -50,7 +50,7 @@ public class RedirectService {
     }
 
 
-    public Optional<Link> findLink(String code) {
+    private Optional<Link> findLink(String code) {
         Optional<Link> cached = cache.get(code);
 
         if (cached.isPresent()) {

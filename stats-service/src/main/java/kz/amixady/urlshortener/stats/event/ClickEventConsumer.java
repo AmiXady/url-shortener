@@ -22,8 +22,7 @@ public class ClickEventConsumer {
                 .toList();
 
         int skipped = batch.size() - events.size();
-
-        if (skipped != events.size()) {
+        if (skipped > 0) {
             log.warn("Skipped {} unreadable click events", skipped);
         }
 

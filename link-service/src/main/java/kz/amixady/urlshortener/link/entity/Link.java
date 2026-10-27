@@ -26,7 +26,7 @@ public class Link {
     @SequenceGenerator(name = "links_seq", sequenceName = "links_id_seq", allocationSize = 50)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(nullable = false, length = 30)
     private String code;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -69,10 +69,12 @@ public class Link {
         return code.toLowerCase(Locale.ROOT);
     }
 
-    public void markDeleted(Instant now) {
-        if (deletedAt == null) {
-            deletedAt = now;
+    public boolean markDeleted(Instant now) {
+        if (deletedAt != null) {
+            return false;
         }
+        deletedAt = now;
+        return true;
     }
 
     public boolean isDeleted() {
@@ -81,10 +83,6 @@ public class Link {
 
     public boolean isExpired(Instant now) {
         return expiresAt != null && !expiresAt.isAfter(now);
-    }
-
-    public boolean isActive(Instant now) {
-        return !isDeleted() && !isExpired(now);
     }
 
     public LinkStatus status(Instant now) {

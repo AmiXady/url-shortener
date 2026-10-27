@@ -9,7 +9,7 @@ import java.time.Instant;
 public record LinkStatsResponse(
         String code,
         long clicks,
-        LinkStatus staus,
+        LinkStatus status,
         Instant updatedAt
 ) {
 }

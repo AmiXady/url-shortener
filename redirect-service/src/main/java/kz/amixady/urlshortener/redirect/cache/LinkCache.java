@@ -3,7 +3,6 @@ package kz.amixady.urlshortener.redirect.cache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kz.amixady.urlshortener.redirect.model.Link;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -14,15 +13,21 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class LinkCache {
     private static final String KEY_PREFIX = "link:";
 
     private final StringRedisTemplate redis;
     private final ObjectMapper objectMapper;
 
-    @Value("${app.cache.link-ttl}")
     private final Duration ttl;
+
+    public LinkCache(StringRedisTemplate redis,
+                     ObjectMapper objectMapper,
+                     @Value("${app.cache.link-ttl}") Duration ttl) {
+        this.redis = redis;
+        this.objectMapper = objectMapper;
+        this.ttl = ttl;
+    }
 
 
     public Optional<Link> get(String code) {
@@ -46,6 +51,11 @@ public class LinkCache {
             log.warn("Redis write failed for code '{}': {}", code, e.getMessage());
 
         }
+    }
+
+
+    public void evict(String code) {
+        redis.delete(key(code));
     }
 
     private static String key(String code) {

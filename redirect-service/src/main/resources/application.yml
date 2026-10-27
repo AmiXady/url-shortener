@@ -32,6 +32,11 @@ spring:
         request.timeout.ms: 5000
         delivery.timeout.ms: 10000
         spring.json.add.type.headers: false
+    consumer:
+      group-id: redirect-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 server:
   port: 8082
@@ -42,6 +47,7 @@ app:
   kafka:
     topics:
       clicks: link-clicks
+      link-events: link-events
 
 logging:
   level:

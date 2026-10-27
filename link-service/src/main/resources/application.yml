@@ -19,9 +19,26 @@ spring:
         jdbc:
           time_zone: UTC
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        delivery.timeout.ms: 10000
+        request.timeout.ms: 5000
+
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+  task:
+    scheduling:
+      pool:
+        size: 3
+      thread-name-prefix: scheduler-
 
 server:
   port: 8081
@@ -30,10 +47,23 @@ app:
   short-link:
     base-url: ${SHORT_LINK_BASE_URL:https://sho.rt}
 
+  cleanup:
+    cron: "0 0 3 * * *"
+
   stats-service:
     base-url: ${STATS_SERVICE_URL:http://localhost:8083}
     connect-timeout: 500ms
     read-timeout: 2s
+
+  kafka:
+    topics:
+      link-events: link-events
+
+  outbox:
+    batch-size: 100
+    max-attempts: 10
+    poll-interval-ms: 1000
+    cleanup-cron: "0 30 3 * * *"
 
 logging:
   level:

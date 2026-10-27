@@ -1,0 +1,2 @@
+CREATE USER stats WITH PASSWORD 'stats';
+CREATE DATABASE stats OWNER stats;

@@ -11,11 +11,13 @@ import kz.amixady.urlshortener.link.dto.response.BatchCreateLinkResponse.ItemRes
 import kz.amixady.urlshortener.link.dto.response.LinkResponse;
 import kz.amixady.urlshortener.link.dto.response.LinkStatsResponse;
 import kz.amixady.urlshortener.link.entity.Link;
+import kz.amixady.urlshortener.link.event.LinkDeletedEvent;
 import kz.amixady.urlshortener.link.exception.CodeAlreadyTakenException;
 import kz.amixady.urlshortener.link.exception.CodeGenerationException;
 import kz.amixady.urlshortener.link.exception.CodeReservedException;
 import kz.amixady.urlshortener.link.exception.LinkNotFoundException;
 import kz.amixady.urlshortener.link.mapper.LinkMapper;
+import kz.amixady.urlshortener.link.outbox.OutboxWriter;
 import kz.amixady.urlshortener.link.repository.LinkRepository;
 import kz.amixady.urlshortener.link.security.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,7 @@ public class LinkService {
     private final TokenService tokenService;
     private final StatsClient statsClient;
     private final Validator validator;
+    private final OutboxWriter outboxWriter;
     private final Clock clock;
 
     // ======================== Public API ========================
@@ -85,10 +88,17 @@ public class LinkService {
     @Transactional
     public void delete(String code, String token) {
         Link link = findByCode(code);
-        tokenService.verify(token, link.getTokenHash());
-        link.markDeleted(clock.instant());
-    }
 
+        tokenService.verify(token, link.getTokenHash());
+
+        if (link.markDeleted(clock.instant())) {
+            outboxWriter.write(new LinkDeletedEvent(
+                    link.getId(),
+                    link.getCode(),
+                    link.getDeletedAt()
+            ));
+        }
+    }
 
     public LinkStatsResponse getStats(String code, String token) {
         Link link = findByCode(code);
