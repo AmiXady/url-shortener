@@ -43,7 +43,7 @@ server:
 
 app:
   cache:
-    link-ttl: 10s
+    link-ttl: 5m
   kafka:
     topics:
       clicks: link-clicks

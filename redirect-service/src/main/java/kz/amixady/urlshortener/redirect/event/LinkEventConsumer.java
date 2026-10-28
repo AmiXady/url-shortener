@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class LinkEventConsumer {
     private static final String LINK_DELETED = "LinkDeleted";
+    private static final String EVENT_TYPE_HEADER = "eventType";
 
     private final LinkCache linkCache;
     private final ObjectMapper objectMapper;
@@ -25,7 +26,7 @@ public class LinkEventConsumer {
 
     @KafkaListener(topics = "${app.kafka.topics.link-events}")
     public void consume(ConsumerRecord<String, String> record) {
-        if (!LINK_DELETED.equals(header(record, "eventType"))) {
+        if (!LINK_DELETED.equals(header(record, EVENT_TYPE_HEADER))) {
             return;
         }
 
